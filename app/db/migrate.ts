@@ -2,7 +2,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 
-const connectionString = process.env.DATABASE_URL || "postgres://biblion:biblion123@localhost:5432/gamevault";
+const connectionString = process.env.POSTGRES_URL || "postgres://biblion:biblion123@localhost:5432/gamevault";
 
 export async function runMigrations() {
   console.log("🔄 Running database migrations...");
