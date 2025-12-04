@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import Header from "@/app/components/Header";
@@ -26,7 +26,29 @@ interface Order {
   items: OrderItem[];
 }
 
+// Loading fallback component
+function OrdersLoading() {
+  return (
+    <div className="min-h-screen" style={{ background: "var(--background)" }}>
+      <Header />
+      <div className="text-center py-16">
+        <div className="animate-spin w-8 h-8 border-2 border-t-transparent rounded-full mx-auto mb-4" style={{ borderColor: "var(--accent-primary)" }} />
+        <p style={{ color: "var(--foreground-muted)" }}>Loading orders...</p>
+      </div>
+    </div>
+  );
+}
+
+// Wrapper with Suspense boundary
 export default function OrdersPage() {
+  return (
+    <Suspense fallback={<OrdersLoading />}>
+      <OrdersContent />
+    </Suspense>
+  );
+}
+
+function OrdersContent() {
   const searchParams = useSearchParams();
   const success = searchParams.get("success");
   const orderId = searchParams.get("orderId");

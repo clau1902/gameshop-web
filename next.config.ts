@@ -1,10 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Enable instrumentation for running migrations on startup
-  experimental: {
-    instrumentationHook: true,
-  },
   // Allow external images from Steam and other CDNs
   images: {
     remotePatterns: [

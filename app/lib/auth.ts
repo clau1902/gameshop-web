@@ -4,6 +4,7 @@ import { db } from "@/app/db";
 import * as schema from "@/app/db/schema";
 
 export const auth = betterAuth({
+  secret: process.env.BETTER_AUTH_SECRET || "gamevault-secret-key-change-in-production-abc123",
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
