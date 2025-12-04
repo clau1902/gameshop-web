@@ -5,6 +5,6 @@ export default defineConfig({
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
-    url: process.env.DATABASE_URL || "postgres://biblion:biblion123@localhost:5432/gamevault",
+    url: process.env.POSTGRES_URL || "postgres://biblion:biblion123@localhost:5432/gamevault",
   },
 });
