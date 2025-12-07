@@ -1,4 +1,4 @@
-import { pgTable, text, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, boolean, timestamp, integer } from "drizzle-orm/pg-core";
 
 // User table - required by better-auth
 export const user = pgTable("user", {
@@ -101,6 +101,22 @@ export const orderItems = pgTable("order_items", {
   createdAt: timestamp("created_at").notNull(),
 });
 
+// Reviews table for user game reviews
+export const reviews = pgTable("reviews", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  userName: text("user_name").notNull(),
+  gameId: text("game_id").notNull(),
+  rating: integer("rating").notNull(), // 1-5 stars
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  helpful: integer("helpful").notNull().default(0),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
+});
+
 // Type exports
 export type User = typeof user.$inferSelect;
 export type Session = typeof session.$inferSelect;
@@ -110,3 +126,4 @@ export type Wishlist = typeof wishlist.$inferSelect;
 export type Cart = typeof cart.$inferSelect;
 export type Order = typeof orders.$inferSelect;
 export type OrderItem = typeof orderItems.$inferSelect;
+export type Review = typeof reviews.$inferSelect;

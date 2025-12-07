@@ -4,6 +4,7 @@ import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { GAMES, Game } from "@/app/data/games";
 import { useCart } from "@/app/contexts/CartContext";
+import Header from "@/app/components/Header";
 
 function StarRating({ rating, size = "md" }: { rating: number; size?: "sm" | "md" | "lg" }) {
   const sizeClasses = {
@@ -49,7 +50,7 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
   const [cartMessage, setCartMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const { addToCart, isInCart } = useCart();
+  const { addToCart, isInCart, items: cartItems } = useCart();
 
   useEffect(() => {
     const foundGame = GAMES.find((g) => g.id === id);
@@ -129,30 +130,20 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
       />
 
       {/* Header */}
-      <header className="relative z-10 px-6 py-4 border-b" style={{ borderColor: "var(--border-subtle)" }}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div
-              className="w-10 h-10 rounded-lg flex items-center justify-center text-xl"
-              style={{ background: "linear-gradient(135deg, var(--accent-primary), var(--gradient-end))" }}
-            >
-              🎮
-            </div>
-            <div>
-              <h1 className="text-xl font-bold">
-                Game<span style={{ color: "var(--accent-primary)" }}>Vault</span>
-              </h1>
-            </div>
-          </Link>
-          <Link
-            href="/"
-            className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
-            style={{ background: "var(--background-elevated)", color: "var(--foreground-muted)" }}
-          >
-            <span>←</span> Back to Browse
-          </Link>
+      <Header />
+
+      {/* Breadcrumb */}
+      <div className="relative z-10 px-6 py-3" style={{ background: "var(--background)" }}>
+        <div className="max-w-7xl mx-auto">
+          <nav className="flex items-center gap-2 text-sm" style={{ color: "var(--foreground-muted)" }}>
+            <Link href="/" className="hover:text-white transition-colors">
+              Browse Games
+            </Link>
+            <span>›</span>
+            <span style={{ color: "var(--foreground)" }}>{game.title}</span>
+          </nav>
         </div>
-      </header>
+      </div>
 
       {/* Hero Section with Cover */}
       <div className="relative">
@@ -276,64 +267,91 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
                 )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {game.stores.map((store) => (
-                    <div
-                      key={store.name}
-                      className="p-4 rounded-lg"
-                      style={{
-                        background: "var(--background-elevated)",
-                        border: "1px solid var(--border-subtle)",
-                      }}
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">{store.logo}</span>
-                          <span className="font-medium">{store.name}</span>
-                        </div>
-                        <span className="font-mono font-bold" style={{ color: "var(--accent-success)" }}>
-                          ${store.price}
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        <a
-                          href={store.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1 py-2 px-3 rounded-lg text-sm font-medium text-center transition-colors hover:bg-white/10"
+                  {(() => {
+                    // Check if game is in cart from ANY store
+                    const gameInCart = isInCart(id);
+                    // Find which store the game is in cart from
+                    const cartStore = cartItems.find(item => item.gameId === id)?.storeName;
+                    
+                    return game.stores.map((store) => {
+                      const thisStoreInCart = cartStore === store.name;
+                      const otherStoreInCart = gameInCart && !thisStoreInCart;
+                      
+                      return (
+                        <div
+                          key={store.name}
+                          className={`p-4 rounded-lg transition-opacity ${otherStoreInCart ? 'opacity-50' : ''}`}
                           style={{
-                            border: "1px solid var(--border-subtle)",
-                            color: "var(--foreground)",
+                            background: "var(--background-elevated)",
+                            border: otherStoreInCart 
+                              ? "1px solid var(--border-subtle)" 
+                              : thisStoreInCart 
+                                ? "1px solid var(--accent-success)"
+                                : "1px solid var(--border-subtle)",
                           }}
                         >
-                          View Store
-                        </a>
-                        {isInCart(id) ? (
-                          <Link
-                            href="/cart"
-                            className="flex-1 py-2 px-3 rounded-lg text-sm font-medium text-center transition-colors"
-                            style={{
-                              background: "var(--accent-success)",
-                              color: "white",
-                            }}
-                          >
-                            In Cart ✓
-                          </Link>
-                        ) : (
-                          <button
-                            onClick={() => handleAddToCart(store.name, store.price)}
-                            disabled={addingToCart === store.name}
-                            className="flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 disabled:opacity-50"
-                            style={{
-                              background: "linear-gradient(135deg, var(--accent-primary), var(--gradient-end))",
-                              color: "white",
-                            }}
-                          >
-                            {addingToCart === store.name ? "Adding..." : "Add to Cart"}
-                          </button>
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <span className={`text-2xl ${otherStoreInCart ? 'grayscale' : ''}`}>{store.logo}</span>
+                              <span className="font-medium">{store.name}</span>
+                            </div>
+                            <span className="font-mono font-bold" style={{ color: otherStoreInCart ? "var(--foreground-muted)" : "var(--accent-success)" }}>
+                              ${store.price}
+                            </span>
+                          </div>
+                          <div className="flex gap-2">
+                            <a
+                              href={store.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex-1 py-2 px-3 rounded-lg text-sm font-medium text-center transition-colors hover:bg-white/10"
+                              style={{
+                                border: "1px solid var(--border-subtle)",
+                                color: "var(--foreground)",
+                              }}
+                            >
+                              View Store
+                            </a>
+                            {thisStoreInCart ? (
+                              <Link
+                                href="/cart"
+                                className="flex-1 py-2 px-3 rounded-lg text-sm font-medium text-center transition-colors"
+                                style={{
+                                  background: "var(--accent-success)",
+                                  color: "white",
+                                }}
+                              >
+                                In Cart ✓
+                              </Link>
+                            ) : otherStoreInCart ? (
+                              <span
+                                className="flex-1 py-2 px-3 rounded-lg text-sm font-medium text-center cursor-not-allowed"
+                                style={{
+                                  background: "var(--background)",
+                                  color: "var(--foreground-muted)",
+                                  border: "1px solid var(--border-subtle)",
+                                }}
+                              >
+                                Unavailable
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => handleAddToCart(store.name, store.price)}
+                                disabled={addingToCart === store.name}
+                                className="flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 disabled:opacity-50"
+                                style={{
+                                  background: "linear-gradient(135deg, var(--accent-primary), var(--gradient-end))",
+                                  color: "white",
+                                }}
+                              >
+                                {addingToCart === store.name ? "Adding..." : "Add to Cart"}
+                              </button>
                         )}
                       </div>
                     </div>
-                  ))}
+                      );
+                    });
+                  })()}
                 </div>
               </div>
             </div>
@@ -358,7 +376,7 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
                 {game.storyline}
               </p>
             </section>
-
+ 
             {/* Screenshots */}
             <section
               className="p-6 rounded-xl"

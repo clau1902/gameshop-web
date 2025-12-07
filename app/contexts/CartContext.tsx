@@ -15,9 +15,9 @@ interface CartContextType {
   items: CartItem[];
   loading: boolean;
   addToCart: (gameId: string, storeName: string, price: number) => Promise<{ success: boolean; error?: string }>;
-  removeFromCart: (gameId: string) => Promise<{ success: boolean; error?: string }>;
+  removeFromCart: (gameId: string, storeName?: string) => Promise<{ success: boolean; error?: string }>;
   clearCart: () => void;
-  isInCart: (gameId: string) => boolean;
+  isInCart: (gameId: string, storeName?: string) => boolean;
   totalItems: number;
   totalPrice: number;
   refreshCart: () => Promise<void>;
@@ -79,13 +79,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const removeFromCart = async (gameId: string) => {
+  const removeFromCart = async (gameId: string, storeName?: string) => {
     if (!session?.user) {
       return { success: false, error: "Please sign in" };
     }
 
     try {
-      const response = await fetch(`/api/cart?gameId=${gameId}`, {
+      let url = `/api/cart?gameId=${gameId}`;
+      if (storeName) {
+        url += `&storeName=${encodeURIComponent(storeName)}`;
+      }
+      
+      const response = await fetch(url, {
         method: "DELETE",
       });
 
@@ -94,7 +99,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
         return { success: false, error: data.error };
       }
 
-      setItems((prev) => prev.filter((item) => item.gameId !== gameId));
+      setItems((prev) => prev.filter((item) => {
+        if (storeName) {
+          return !(item.gameId === gameId && item.storeName === storeName);
+        }
+        return item.gameId !== gameId;
+      }));
       return { success: true };
     } catch (error) {
       return { success: false, error: "Failed to remove from cart" };
@@ -105,7 +115,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems([]);
   };
 
-  const isInCart = (gameId: string) => {
+  const isInCart = (gameId: string, storeName?: string) => {
+    if (storeName) {
+      return items.some((item) => item.gameId === gameId && item.storeName === storeName);
+    }
     return items.some((item) => item.gameId === gameId);
   };
 

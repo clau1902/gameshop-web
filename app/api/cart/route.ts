@@ -21,7 +21,16 @@ export async function GET() {
       .from(cart)
       .where(eq(cart.userId, session.user.id));
 
-    return NextResponse.json({ items: cartItems });
+    // Ensure camelCase field names
+    const items = cartItems.map(item => ({
+      id: item.id,
+      gameId: item.gameId,
+      storeName: item.storeName,
+      price: item.price,
+      createdAt: item.createdAt,
+    }));
+
+    return NextResponse.json({ items });
   } catch (error) {
     console.error("Error fetching cart:", error);
     return NextResponse.json({ error: "Failed to fetch cart" }, { status: 500 });
@@ -56,16 +65,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Item already in cart" }, { status: 400 });
     }
 
-    const newItem = await db.insert(cart).values({
-      id: crypto.randomUUID(),
+    const id = crypto.randomUUID();
+    const createdAt = new Date();
+    
+    await db.insert(cart).values({
+      id,
       userId: session.user.id,
       gameId,
       storeName,
       price: price.toString(),
-      createdAt: new Date(),
-    }).returning();
+      createdAt,
+    });
 
-    return NextResponse.json({ item: newItem[0] });
+    // Return with correct camelCase field names
+    return NextResponse.json({ 
+      item: {
+        id,
+        gameId,
+        storeName,
+        price: price.toString(),
+        createdAt: createdAt.toISOString(),
+      }
+    });
   } catch (error) {
     console.error("Error adding to cart:", error);
     return NextResponse.json({ error: "Failed to add to cart" }, { status: 500 });
