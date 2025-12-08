@@ -5,6 +5,20 @@ import Link from "next/link";
 import { GAMES, Game } from "@/app/data/games";
 import { useCart } from "@/app/contexts/CartContext";
 import Header from "@/app/components/Header";
+import { authClient } from "@/app/lib/auth-client";
+
+interface Review {
+  id: string;
+  userId: string;
+  userName: string;
+  gameId: string;
+  rating: number;
+  title: string;
+  content: string;
+  helpful: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
 function StarRating({ rating, size = "md" }: { rating: number; size?: "sm" | "md" | "lg" }) {
   const sizeClasses = {
@@ -22,6 +36,30 @@ function StarRating({ rating, size = "md" }: { rating: number; size?: "sm" | "md
         >
           ★
         </span>
+      ))}
+    </div>
+  );
+}
+
+function StarRatingInput({ rating, onChange }: { rating: number; onChange: (rating: number) => void }) {
+  const [hoverRating, setHoverRating] = useState(0);
+  
+  return (
+    <div className="flex gap-1">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          type="button"
+          onClick={() => onChange(star)}
+          onMouseEnter={() => setHoverRating(star)}
+          onMouseLeave={() => setHoverRating(0)}
+          className="text-3xl transition-transform hover:scale-110"
+          style={{ 
+            color: star <= (hoverRating || rating) ? "var(--star-filled)" : "var(--star-empty)",
+          }}
+        >
+          ★
+        </button>
       ))}
     </div>
   );
@@ -51,6 +89,20 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
   const [cartMessage, setCartMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const { addToCart, isInCart, items: cartItems } = useCart();
+  
+  // Reviews state
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loadingReviews, setLoadingReviews] = useState(true);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ rating: 0, title: "", content: "" });
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const { data: session } = authClient.useSession();
+
+  // Calculate average rating
+  const averageRating = reviews.length > 0 
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
+    : 0;
 
   useEffect(() => {
     const foundGame = GAMES.find((g) => g.id === id);
@@ -62,7 +114,103 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
       const wishlist = JSON.parse(savedWishlist);
       setIsInWishlist(wishlist.includes(id));
     }
+    
+    // Fetch reviews
+    fetchReviews();
   }, [id]);
+  
+  const fetchReviews = async () => {
+    setLoadingReviews(true);
+    try {
+      const response = await fetch(`/api/reviews?gameId=${id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setReviews(data.reviews || []);
+      }
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+    } finally {
+      setLoadingReviews(false);
+    }
+  };
+  
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!session?.user) {
+      setReviewError("Please sign in to submit a review");
+      return;
+    }
+    if (reviewForm.rating === 0) {
+      setReviewError("Please select a rating");
+      return;
+    }
+    if (!reviewForm.title.trim() || !reviewForm.content.trim()) {
+      setReviewError("Please fill in all fields");
+      return;
+    }
+    
+    setSubmittingReview(true);
+    setReviewError(null);
+    
+    try {
+      const response = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          gameId: id,
+          rating: reviewForm.rating,
+          title: reviewForm.title,
+          content: reviewForm.content,
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        setReviewError(data.error || "Failed to submit review");
+        return;
+      }
+      
+      // Add new review to list
+      setReviews((prev) => [data.review, ...prev]);
+      setReviewForm({ rating: 0, title: "", content: "" });
+      setShowReviewForm(false);
+    } catch (error) {
+      setReviewError("Failed to submit review");
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+  
+  const handleDeleteReview = async (reviewId: string) => {
+    try {
+      const response = await fetch(`/api/reviews?reviewId=${reviewId}`, {
+        method: "DELETE",
+      });
+      
+      if (response.ok) {
+        setReviews((prev) => prev.filter((r) => r.id !== reviewId));
+      }
+    } catch (error) {
+      console.error("Error deleting review:", error);
+    }
+  };
+  
+  const handleHelpful = async (reviewId: string) => {
+    try {
+      await fetch("/api/reviews/helpful", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviewId }),
+      });
+      
+      setReviews((prev) => prev.map((r) => 
+        r.id === reviewId ? { ...r, helpful: r.helpful + 1 } : r
+      ));
+    } catch (error) {
+      console.error("Error marking helpful:", error);
+    }
+  };
 
   const toggleWishlist = () => {
     const savedWishlist = localStorage.getItem("gameVaultWishlist");
@@ -201,13 +349,21 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
               <h1 className="text-4xl lg:text-5xl font-extrabold mb-4">{game.title}</h1>
 
               <div className="flex items-center gap-4 mb-4">
-                <div className="flex items-center gap-2">
-                  <StarRating rating={game.rating} size="lg" />
-                  <span className="text-2xl font-bold">{game.rating}</span>
-                </div>
-                <span style={{ color: "var(--foreground-muted)" }}>
-                  {game.reviewCount.toLocaleString()} reviews
-                </span>
+                {reviews.length > 0 ? (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <StarRating rating={averageRating} size="lg" />
+                      <span className="text-2xl font-bold">{averageRating.toFixed(1)}</span>
+                    </div>
+                    <span style={{ color: "var(--foreground-muted)" }}>
+                      {reviews.length.toLocaleString()} {reviews.length === 1 ? "review" : "reviews"}
+                    </span>
+                  </>
+                ) : (
+                  <span style={{ color: "var(--foreground-muted)" }}>
+                    No reviews yet
+                  </span>
+                )}
               </div>
 
               <div className="flex flex-wrap items-center gap-4 mb-6" style={{ color: "var(--foreground-muted)" }}>
@@ -431,48 +587,204 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
               className="p-6 rounded-xl"
               style={{ background: "var(--background-card)", border: "1px solid var(--border-subtle)" }}
             >
-              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                <span>💬</span> User Reviews
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <span>💬</span> User Reviews
+                  {reviews.length > 0 && (
+                    <span className="text-base font-normal" style={{ color: "var(--foreground-muted)" }}>
+                      ({reviews.length})
+                    </span>
+                  )}
+                </h2>
+                {reviews.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <StarRating rating={averageRating} size="md" />
+                    <span className="font-bold">{averageRating.toFixed(1)}</span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Write Review Button */}
+              {session?.user && !showReviewForm && !reviews.some(r => r.userId === session.user?.id) && (
+                <button
+                  onClick={() => setShowReviewForm(true)}
+                  className="w-full mb-4 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-[1.02]"
+                  style={{
+                    background: "linear-gradient(135deg, var(--accent-primary), var(--gradient-end))",
+                    color: "white",
+                  }}
+                >
+                  ✍️ Write a Review
+                </button>
+              )}
+              
+              {!session?.user && (
+                <div 
+                  className="mb-4 p-4 rounded-lg text-center"
+                  style={{ background: "var(--background-elevated)" }}
+                >
+                  <p style={{ color: "var(--foreground-muted)" }}>
+                    <Link href="/signin" className="font-medium" style={{ color: "var(--accent-primary)" }}>
+                      Sign in
+                    </Link>
+                    {" "}to write a review
+                  </p>
+                </div>
+              )}
+              
+              {/* Review Form */}
+              {showReviewForm && (
+                <form onSubmit={handleSubmitReview} className="mb-6 p-4 rounded-lg" style={{ background: "var(--background-elevated)" }}>
+                  <h3 className="text-lg font-bold mb-4">Write Your Review</h3>
+                  
+                  {reviewError && (
+                    <div className="mb-4 p-3 rounded-lg text-sm" style={{ background: "rgba(239, 68, 68, 0.1)", color: "#ef4444" }}>
+                      {reviewError}
+                    </div>
+                  )}
+                  
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-2">Your Rating</label>
+                    <StarRatingInput rating={reviewForm.rating} onChange={(r) => setReviewForm(prev => ({ ...prev, rating: r }))} />
+                  </div>
+                  
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-2">Review Title</label>
+                    <input
+                      type="text"
+                      value={reviewForm.title}
+                      onChange={(e) => setReviewForm(prev => ({ ...prev, title: e.target.value }))}
+                      placeholder="Summarize your experience"
+                      className="w-full px-4 py-2 rounded-lg outline-none focus:ring-2"
+                      style={{
+                        background: "var(--background)",
+                        border: "1px solid var(--border-subtle)",
+                        color: "var(--foreground)",
+                      }}
+                    />
+                  </div>
+                  
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-2">Your Review</label>
+                    <textarea
+                      value={reviewForm.content}
+                      onChange={(e) => setReviewForm(prev => ({ ...prev, content: e.target.value }))}
+                      placeholder="Share your thoughts about the game..."
+                      rows={4}
+                      className="w-full px-4 py-2 rounded-lg outline-none focus:ring-2 resize-none"
+                      style={{
+                        background: "var(--background)",
+                        border: "1px solid var(--border-subtle)",
+                        color: "var(--foreground)",
+                      }}
+                    />
+                  </div>
+                  
+                  <div className="flex gap-3">
+                    <button
+                      type="submit"
+                      disabled={submittingReview}
+                      className="flex-1 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-[1.02] disabled:opacity-50"
+                      style={{
+                        background: "linear-gradient(135deg, var(--accent-primary), var(--gradient-end))",
+                        color: "white",
+                      }}
+                    >
+                      {submittingReview ? "Submitting..." : "Submit Review"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowReviewForm(false);
+                        setReviewForm({ rating: 0, title: "", content: "" });
+                        setReviewError(null);
+                      }}
+                      className="px-6 py-3 rounded-lg font-medium transition-colors"
+                      style={{
+                        background: "var(--background)",
+                        border: "1px solid var(--border-subtle)",
+                        color: "var(--foreground)",
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
+              
+              {/* Reviews List */}
               <div className="space-y-4">
-                {(showAllReviews ? game.reviews : game.reviews.slice(0, 3)).map((review, index) => (
-                  <div
-                    key={index}
-                    className="p-4 rounded-lg"
-                    style={{ background: "var(--background-elevated)" }}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold"
-                          style={{ background: "var(--accent-primary)", color: "var(--background)" }}
-                        >
-                          {review.author[0].toUpperCase()}
-                        </div>
-                        <div>
-                          <div className="font-medium">{review.author}</div>
-                          <div className="text-xs" style={{ color: "var(--foreground-muted)" }}>
-                            {new Date(review.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+                {loadingReviews ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin w-8 h-8 border-2 border-t-transparent rounded-full mx-auto mb-2" style={{ borderColor: "var(--accent-primary)" }} />
+                    <p style={{ color: "var(--foreground-muted)" }}>Loading reviews...</p>
+                  </div>
+                ) : reviews.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="text-4xl mb-2">📝</div>
+                    <p style={{ color: "var(--foreground-muted)" }}>No reviews yet. Be the first to review!</p>
+                  </div>
+                ) : (
+                  <>
+                    {(showAllReviews ? reviews : reviews.slice(0, 3)).map((review) => (
+                      <div
+                        key={review.id}
+                        className="p-4 rounded-lg"
+                        style={{ background: "var(--background-elevated)" }}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center gap-3">
+                            <div 
+                              className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold"
+                              style={{ background: "var(--accent-primary)", color: "var(--background)" }}
+                            >
+                              {review.userName[0].toUpperCase()}
+                            </div>
+                            <div>
+                              <div className="font-medium">{review.userName}</div>
+                              <div className="text-xs" style={{ color: "var(--foreground-muted)" }}>
+                                {new Date(review.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+                              </div>
+                            </div>
                           </div>
+                          <StarRating rating={review.rating} size="sm" />
+                        </div>
+                        <h4 className="font-semibold mb-1">{review.title}</h4>
+                        <p className="mb-3" style={{ color: "var(--foreground-muted)" }}>{review.content}</p>
+                        <div className="flex items-center justify-between">
+                          <button
+                            onClick={() => handleHelpful(review.id)}
+                            className="flex items-center gap-1 text-sm px-3 py-1 rounded-lg transition-colors hover:bg-white/5"
+                            style={{ color: "var(--foreground-muted)" }}
+                          >
+                            👍 Helpful ({review.helpful})
+                          </button>
+                          {session?.user?.id === review.userId && (
+                            <button
+                              onClick={() => handleDeleteReview(review.id)}
+                              className="text-sm px-3 py-1 rounded-lg transition-colors hover:bg-red-500/10"
+                              style={{ color: "#ef4444" }}
+                            >
+                              Delete
+                            </button>
+                          )}
                         </div>
                       </div>
-                      <StarRating rating={review.rating} size="sm" />
-                    </div>
-                    <p style={{ color: "var(--foreground-muted)" }}>{review.text}</p>
-                  </div>
-                ))}
-                {game.reviews.length > 3 && !showAllReviews && (
-                  <button
-                    onClick={() => setShowAllReviews(true)}
-                    className="w-full py-3 rounded-lg font-medium transition-colors"
-                    style={{
-                      background: "var(--background-elevated)",
-                      color: "var(--accent-primary)",
-                      border: "1px solid var(--border-accent)",
-                    }}
-                  >
-                    Show All {game.reviews.length} Reviews
-                  </button>
+                    ))}
+                    {reviews.length > 3 && !showAllReviews && (
+                      <button
+                        onClick={() => setShowAllReviews(true)}
+                        className="w-full py-3 rounded-lg font-medium transition-colors"
+                        style={{
+                          background: "var(--background-elevated)",
+                          color: "var(--accent-primary)",
+                          border: "1px solid var(--border-accent)",
+                        }}
+                      >
+                        Show All {reviews.length} Reviews
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             </section>

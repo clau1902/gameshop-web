@@ -6,13 +6,6 @@ export interface Store {
   logo: string;
 }
 
-export interface Review {
-  author: string;
-  rating: number;
-  text: string;
-  date: string;
-}
-
 export interface Game {
   id: string;
   title: string;
@@ -22,14 +15,11 @@ export interface Game {
   releaseDate: string;
   developer: string;
   publisher: string;
-  rating: number;
-  reviewCount: number;
   description: string;
   storyline: string;
   features: string[];
   screenshots: string[];
   stores: Store[];
-  reviews: Review[];
 }
 
 // Sample data with actual game screenshots
@@ -43,8 +33,6 @@ export const GAMES: Game[] = [
     releaseDate: "2022-02-25",
     developer: "FromSoftware",
     publisher: "Bandai Namco Entertainment",
-    rating: 4.9,
-    reviewCount: 524892,
     description: "A new fantasy action RPG where you rise as a Tarnished to explore the Lands Between, a vast world full of danger and discovery.",
     storyline: "The Elden Ring, the source of the Erdtree's power, was shattered. Its shards, known as the Great Runes, were claimed by the demigod children of Queen Marika the Eternal, and the madness of their newfound power led to war. The Shattering. A war that meant abandonment by the Greater Will. And now the guidance of grace will be brought to the Tarnished who were spurned by the grace of gold and exiled from the Lands Between. Rise, Tarnished, and be guided by grace to brandish the power of the Elden Ring and become an Elden Lord in the Lands Between.",
     features: [
@@ -65,11 +53,6 @@ export const GAMES: Game[] = [
       { name: "PlayStation Store", url: "https://store.playstation.com/en-us/product/UP0700-PPSA05916_00-ELDENRING0000000", price: 59.99, logo: "🎲" },
       { name: "Xbox Store", url: "https://www.xbox.com/en-US/games/store/elden-ring/9P3J32CTXLRZ", price: 59.99, logo: "💚" },
     ],
-    reviews: [
-      { author: "DarkSoulsFan", rating: 5, text: "FromSoftware's magnum opus. The open world design is revolutionary for the genre.", date: "2024-11-20" },
-      { author: "RPGEnthusiast", rating: 5, text: "Over 200 hours in and still finding new secrets. A masterpiece.", date: "2024-11-15" },
-      { author: "CasualGamer", rating: 4, text: "Challenging but incredibly rewarding. The world is breathtaking.", date: "2024-11-10" },
-    ],
   },
   {
     id: "2",
@@ -80,8 +63,6 @@ export const GAMES: Game[] = [
     releaseDate: "2023-08-03",
     developer: "Larian Studios",
     publisher: "Larian Studios",
-    rating: 4.9,
-    reviewCount: 612847,
     description: "Gather your party and return to the Forgotten Realms in this next-generation D&D RPG filled with choices and consequences.",
     storyline: "A mysterious plague called the Absolute is sweeping the land. You and your companions have been infected with a Mind Flayer tadpole that threatens to transform you into horrific monsters. As you race against time to find a cure, you'll uncover a sinister conspiracy that threatens all of Faerûn. Your choices will shape the fate of the realms—will you resist the corruption within, or embrace the power it offers? Forge unlikely alliances, romance complex companions, and decide the destiny of countless lives in this epic tale of survival, sacrifice, and the eternal struggle between good and evil.",
     features: [
@@ -102,11 +83,6 @@ export const GAMES: Game[] = [
       { name: "GOG", url: "https://www.gog.com/en/game/baldurs_gate_iii", price: 59.99, logo: "🌟" },
       { name: "PlayStation Store", url: "https://store.playstation.com/en-us/product/UP3526-PPSA09159_00-BG3STANDARDEDPS5", price: 69.99, logo: "🎲" },
     ],
-    reviews: [
-      { author: "CRPGLover", rating: 5, text: "The new gold standard for RPGs. Every choice matters.", date: "2024-10-30" },
-      { author: "TabletopGamer", rating: 5, text: "Best D&D video game ever made. The freedom is unmatched.", date: "2024-10-25" },
-      { author: "StoryFan", rating: 5, text: "The writing and voice acting are incredible. A true masterpiece.", date: "2024-10-20" },
-    ],
   },
   {
     id: "3",
@@ -117,8 +93,6 @@ export const GAMES: Game[] = [
     releaseDate: "2020-12-10",
     developer: "CD Projekt Red",
     publisher: "CD Projekt",
-    rating: 4.5,
-    reviewCount: 489321,
     description: "An open-world action-adventure RPG set in Night City, a megalopolis obsessed with power, glamour and body modification.",
     storyline: "In the year 2077, Night City is the most dangerous metropolis in America. You are V, a mercenary outlaw going after a one-of-a-kind implant that holds the key to immortality. But when a heist goes wrong, you end up with a digital ghost in your head—the legendary rockerboy terrorist Johnny Silverhand, played by Keanu Reeves. As Johnny's personality slowly overwrites your own, you must race against time to save yourself and uncover the dark secrets of Night City's most powerful corporations. In a city of dreams and nightmares, the line between hero and villain has never been blurrier.",
     features: [
@@ -139,11 +113,6 @@ export const GAMES: Game[] = [
       { name: "GOG", url: "https://www.gog.com/en/game/cyberpunk_2077", price: 59.99, logo: "🌟" },
       { name: "Epic Games", url: "https://store.epicgames.com/en-US/p/cyberpunk-2077", price: 59.99, logo: "🎯" },
     ],
-    reviews: [
-      { author: "NightCityRunner", rating: 5, text: "After all the updates, this game is incredible. Night City is breathtaking.", date: "2024-11-01" },
-      { author: "SciFiFan", rating: 4, text: "Phantom Liberty DLC elevated this game to a masterpiece.", date: "2024-10-28" },
-      { author: "TechNoir", rating: 5, text: "The atmosphere and storytelling are unmatched in gaming.", date: "2024-10-15" },
-    ],
   },
   {
     id: "4",
@@ -154,8 +123,6 @@ export const GAMES: Game[] = [
     releaseDate: "2023-05-12",
     developer: "Nintendo",
     publisher: "Nintendo",
-    rating: 4.9,
-    reviewCount: 328745,
     description: "Explore the vast land and skies of Hyrule with new abilities that let Link craft weapons and vehicles in this sequel to Breath of the Wild.",
     storyline: "In this sequel to The Legend of Zelda: Breath of the Wild, you'll decide your own path through the sprawling landscapes of Hyrule and the mysterious islands floating in the vast skies above. Can you harness the power of Link's new abilities to fight back against the malevolent forces that threaten the kingdom? Beneath Hyrule Castle, Link and Zelda discover a mummified corpse held in place by a mysterious arm. When they accidentally awaken this ancient evil—Ganondorf, the Demon King—Zelda vanishes, and Link must embark on a journey across land, sky, and even the depths below Hyrule to find her and stop a cataclysm that threatens all of existence.",
     features: [
@@ -176,11 +143,6 @@ export const GAMES: Game[] = [
       { name: "Amazon", url: "https://www.amazon.com/Legend-Zelda-Tears-Kingdom-Nintendo-Switch/dp/B0C2TXWC3M", price: 69.99, logo: "📦" },
       { name: "GameStop", url: "https://www.gamestop.com/video-games/nintendo-switch/products/the-legend-of-zelda-tears-of-the-kingdom---nintendo-switch/355156.html", price: 69.99, logo: "🏪" },
     ],
-    reviews: [
-      { author: "ZeldaVeteran", rating: 5, text: "Nintendo has done it again. The creativity system is mind-blowing.", date: "2024-11-18" },
-      { author: "OpenWorldFan", rating: 5, text: "500+ hours and I'm still finding new things to build and discover.", date: "2024-11-10" },
-      { author: "NintendoFan", rating: 5, text: "The best Zelda game ever made. Pure magic.", date: "2024-11-05" },
-    ],
   },
   {
     id: "5",
@@ -191,8 +153,6 @@ export const GAMES: Game[] = [
     releaseDate: "2020-09-17",
     developer: "Supergiant Games",
     publisher: "Supergiant Games",
-    rating: 4.8,
-    reviewCount: 267432,
     description: "Defy the god of the dead as you battle out of the Underworld in this roguelike dungeon crawler with award-winning narrative.",
     storyline: "You are Zagreus, immortal son of Hades, and you're not happy at home. Your father, the Lord of the Underworld, has forbidden you from leaving his realm, but you're determined to escape and find your long-lost mother on the surface. With each attempt, you'll fight through hordes of shades and mythological monsters, receive blessings from the Olympian gods who support your rebellion, and slowly uncover the truth about your family. Death is not the end—it's just a chance to try again, armed with new weapons, abilities, and knowledge. Can you defy death itself and escape the Underworld?",
     features: [
@@ -213,11 +173,6 @@ export const GAMES: Game[] = [
       { name: "Epic Games", url: "https://store.epicgames.com/en-US/p/hades", price: 24.99, logo: "🎯" },
       { name: "Nintendo eShop", url: "https://www.nintendo.com/us/store/products/hades-switch/", price: 24.99, logo: "🍄" },
     ],
-    reviews: [
-      { author: "RoguelikeFan", rating: 5, text: "The perfect roguelike. Amazing combat, story, and replay value.", date: "2024-10-20" },
-      { author: "IndieGamer", rating: 5, text: "Supergiant's best game yet. Every run feels fresh and exciting.", date: "2024-10-15" },
-      { author: "MythologyBuff", rating: 5, text: "The Greek mythology interpretation is brilliant and heartfelt.", date: "2024-10-10" },
-    ],
   },
   {
     id: "6",
@@ -228,8 +183,6 @@ export const GAMES: Game[] = [
     releaseDate: "2022-11-09",
     developer: "Santa Monica Studio",
     publisher: "Sony Interactive Entertainment",
-    rating: 4.8,
-    reviewCount: 356789,
     description: "Embark on an epic journey as Kratos and Atreus struggle with holding on and letting go across the Nine Realms.",
     storyline: "Fimbulwinter is well underway. Kratos and Atreus must journey to each of the Nine Realms in search of answers as Asgardian forces prepare for a prophesied battle that will end the world. Along the way, they will explore stunning, mythical landscapes, and face fearsome enemies in the form of Norse gods and monsters. The threat of Ragnarök grows ever closer. Kratos and Atreus must choose between their own safety and the safety of the realms. As the lines between fathers and sons, gods and mortals, warriors and fathers blur, they must confront the ultimate question: can one change their destiny?",
     features: [
@@ -250,11 +203,6 @@ export const GAMES: Game[] = [
       { name: "PlayStation Store", url: "https://store.playstation.com/en-us/product/UP9000-PPSA08332_00-YOURLEGENDGODEPS", price: 69.99, logo: "🎲" },
       { name: "Epic Games", url: "https://store.epicgames.com/en-US/p/god-of-war-ragnarok", price: 59.99, logo: "🎯" },
     ],
-    reviews: [
-      { author: "ActionFan", rating: 5, text: "A worthy sequel. The story and combat are even better than the first.", date: "2024-11-05" },
-      { author: "NorseMythFan", rating: 5, text: "Emotional storytelling meets brutal combat. A masterpiece.", date: "2024-10-30" },
-      { author: "PlayStation4Life", rating: 5, text: "Santa Monica Studio has outdone themselves. Incredible.", date: "2024-10-25" },
-    ],
   },
   {
     id: "7",
@@ -265,8 +213,6 @@ export const GAMES: Game[] = [
     releaseDate: "2018-10-26",
     developer: "Rockstar Games",
     publisher: "Rockstar Games",
-    rating: 4.9,
-    reviewCount: 678234,
     description: "America, 1899. Arthur Morgan and the Van der Linde gang must flee across America as federal agents hunt them down.",
     storyline: "America, 1899. The end of the Wild West era has begun. After a robbery goes badly wrong in the western town of Blackwater, Arthur Morgan and the Van der Linde gang are forced to flee. With federal agents and the best bounty hunters in the nation massing on their heels, the gang must rob, steal and fight their way across the rugged heartland of America in order to survive. As deepening internal divisions threaten to tear the gang apart, Arthur must make a choice between his own ideals and loyalty to the gang who raised him. Experience the epic tale of Arthur Morgan and the Van der Linde gang as they face the dawn of a new age.",
     features: [
@@ -287,11 +233,6 @@ export const GAMES: Game[] = [
       { name: "Rockstar Store", url: "https://store.rockstargames.com/en/game/buy-red-dead-redemption-2", price: 59.99, logo: "⭐" },
       { name: "Epic Games", url: "https://store.epicgames.com/en-US/p/red-dead-redemption-2", price: 59.99, logo: "🎯" },
     ],
-    reviews: [
-      { author: "WesternFan", rating: 5, text: "The best story in gaming. Arthur Morgan's journey is unforgettable.", date: "2024-11-12" },
-      { author: "OpenWorldLover", rating: 5, text: "The attention to detail is insane. A living, breathing world.", date: "2024-11-08" },
-      { author: "RockstarFan", rating: 5, text: "A true masterpiece. Nothing else comes close.", date: "2024-11-01" },
-    ],
   },
   {
     id: "8",
@@ -302,8 +243,6 @@ export const GAMES: Game[] = [
     releaseDate: "2017-02-24",
     developer: "Team Cherry",
     publisher: "Team Cherry",
-    rating: 4.9,
-    reviewCount: 412567,
     description: "Descend into the depths of Hallownest, a vast ruined kingdom beneath the surface, and uncover ancient secrets.",
     storyline: "Beneath the fading town of Dirtmouth sleeps an ancient, ruined kingdom. Many are drawn below the surface, searching for riches, or glory, or answers to old secrets. You are the Knight, a mysterious silent warrior who descends into Hallownest's depths. As you explore twisting caverns, ancient cities, and deadly wastelands, you'll uncover the history of this strange world and the plague that drove its citizens to madness. Face twisted creatures and befriend bizarre bugs. Master nail combat and powerful spells. Uncover the mysteries at Hallownest's heart—if you can survive the journey.",
     features: [
@@ -324,11 +263,6 @@ export const GAMES: Game[] = [
       { name: "GOG", url: "https://www.gog.com/en/game/hollow_knight", price: 14.99, logo: "🌟" },
       { name: "Nintendo eShop", url: "https://www.nintendo.com/us/store/products/hollow-knight-switch/", price: 14.99, logo: "🍄" },
     ],
-    reviews: [
-      { author: "MetroidvaniaFan", rating: 5, text: "One of the best games ever made. Incredible value for the price.", date: "2024-10-25" },
-      { author: "IndieLover", rating: 5, text: "Tight controls, beautiful art, haunting music. A masterpiece.", date: "2024-10-20" },
-      { author: "ChallengeFan", rating: 5, text: "The boss fights are legendary. So satisfying to master.", date: "2024-10-15" },
-    ],
   },
   {
     id: "9",
@@ -339,8 +273,6 @@ export const GAMES: Game[] = [
     releaseDate: "2015-05-19",
     developer: "CD Projekt Red",
     publisher: "CD Projekt",
-    rating: 4.9,
-    reviewCount: 723456,
     description: "As Geralt of Rivia, a monster hunter, search for the Child of Prophecy in a vast open world rich with adventure.",
     storyline: "You are Geralt of Rivia, a witcher—a mutated monster hunter for hire. Years ago, you trained a young girl named Ciri, who possesses Elder Blood that gives her the power to manipulate time and space. Now the Wild Hunt, a cavalcade of spectral riders from another world, seeks Ciri for her power. As war rages across the Northern Kingdoms and the Nilfgaardian Empire, you must track down Ciri before the Wild Hunt finds her. Your journey will take you from war-torn villages to magical islands, from royal courts to haunted forests. Along the way, your choices will shape the fate of nations and the lives of those you meet.",
     features: [
@@ -360,11 +292,6 @@ export const GAMES: Game[] = [
       { name: "Steam", url: "https://store.steampowered.com/app/292030/The_Witcher_3_Wild_Hunt/", price: 39.99, logo: "🎮" },
       { name: "GOG", url: "https://www.gog.com/en/game/the_witcher_3_wild_hunt", price: 39.99, logo: "🌟" },
       { name: "Epic Games", url: "https://store.epicgames.com/en-US/p/the-witcher-3-wild-hunt", price: 39.99, logo: "🎯" },
-    ],
-    reviews: [
-      { author: "WitcherFan", rating: 5, text: "Even years later, this is the gold standard for open-world RPGs.", date: "2024-11-15" },
-      { author: "StoryGamer", rating: 5, text: "The DLCs alone are better than most full games.", date: "2024-11-10" },
-      { author: "RPGVeteran", rating: 5, text: "A timeless classic that still holds up beautifully.", date: "2024-11-05" },
     ],
   },
 ];

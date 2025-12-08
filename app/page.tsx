@@ -6,27 +6,6 @@ import { GAMES, ALL_GENRES, ALL_PLATFORMS, Game } from "@/app/data/games";
 import Header from "@/app/components/Header";
 
 // Components
-function StarRating({ rating, size = "md" }: { rating: number; size?: "sm" | "md" | "lg" }) {
-  const sizeClasses = {
-    sm: "text-sm",
-    md: "text-lg",
-    lg: "text-2xl",
-  };
-
-  return (
-    <div className={`flex gap-0.5 ${sizeClasses[size]}`}>
-      {[1, 2, 3, 4, 5].map((star) => (
-        <span
-          key={star}
-          style={{ color: star <= Math.round(rating) ? "var(--star-filled)" : "var(--star-empty)" }}
-        >
-          ★
-        </span>
-      ))}
-    </div>
-  );
-}
-
 function PlatformBadge({ platform }: { platform: string }) {
   const colors: Record<string, string> = {
     PC: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
@@ -103,17 +82,11 @@ function GameCard({ game, index, isInWishlist, onToggleWishlist }: {
 
       {/* Content */}
       <div className="p-5">
-        {/* Title & Rating */}
-        <div className="flex items-start justify-between gap-2 mb-3">
+        {/* Title */}
+        <div className="mb-3">
           <h3 className="text-lg font-bold leading-tight" style={{ color: "var(--foreground)" }}>
             {game.title}
           </h3>
-          <div className="flex flex-col items-end shrink-0">
-            <StarRating rating={game.rating} size="sm" />
-            <span className="text-xs mt-0.5" style={{ color: "var(--foreground-muted)" }}>
-              {game.reviewCount.toLocaleString()} reviews
-            </span>
-          </div>
         </div>
 
         {/* Developer & Date */}
@@ -553,7 +526,7 @@ export default function GameBrowser() {
                         <div className="text-xs capitalize" style={{ color: "var(--foreground-muted)" }}>
                           {suggestion.type}
                           {suggestion.type === "game" && suggestion.game && (
-                            <span> • {suggestion.game.developer} • ⭐ {suggestion.game.rating}</span>
+                            <span> • {suggestion.game.developer}</span>
                           )}
                         </div>
                       </div>
