@@ -175,7 +175,7 @@ export default function GameBrowser() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<"rating" | "date" | "price">("rating");
+  const [sortBy, setSortBy] = useState<"date" | "price" | "name">("date");
   const [showFilters, setShowFilters] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
@@ -322,12 +322,12 @@ export default function GameBrowser() {
     // Sort (use slice to avoid mutating the filtered array)
     const sorted = [...filtered].sort((a, b) => {
       switch (sortBy) {
-        case "rating":
-          return b.rating - a.rating;
         case "date":
           return new Date(b.releaseDate).getTime() - new Date(a.releaseDate).getTime();
         case "price":
           return Math.min(...a.stores.map((s) => s.price)) - Math.min(...b.stores.map((s) => s.price));
+        case "name":
+          return a.title.localeCompare(b.title);
         default:
           return 0;
       }
@@ -590,7 +590,7 @@ export default function GameBrowser() {
               <span className="text-sm" style={{ color: "var(--foreground-muted)" }}>Sort by:</span>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as "rating" | "date" | "price")}
+                onChange={(e) => setSortBy(e.target.value as "date" | "price" | "name")}
                 className="px-3 py-2 rounded-lg outline-none cursor-pointer"
                 style={{
                   background: "var(--background-elevated)",
@@ -598,9 +598,9 @@ export default function GameBrowser() {
                   border: "1px solid var(--border-subtle)",
                 }}
               >
-                <option value="rating">Top Rated</option>
                 <option value="date">Newest</option>
                 <option value="price">Lowest Price</option>
+                <option value="name">Name (A-Z)</option>
               </select>
             </div>
           </div>
