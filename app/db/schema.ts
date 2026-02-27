@@ -1,4 +1,4 @@
-import { pgTable, text, boolean, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, boolean, timestamp, integer, numeric } from "drizzle-orm/pg-core";
 
 // User table - required by better-auth
 export const user = pgTable("user", {
@@ -52,6 +52,35 @@ export const verification = pgTable("verification", {
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at"),
   updatedAt: timestamp("updated_at"),
+});
+
+// Games table - stores all game catalog data
+export const game = pgTable("game", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  cover: text("cover").notNull(),
+  genres: text("genres").array().notNull(),
+  platforms: text("platforms").array().notNull(),
+  releaseDate: text("release_date").notNull(),
+  developer: text("developer").notNull(),
+  publisher: text("publisher").notNull(),
+  description: text("description").notNull(),
+  storyline: text("storyline").notNull(),
+  features: text("features").array().notNull(),
+  screenshots: text("screenshots").array().notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Game stores table - each game can be sold in multiple stores
+export const gameStore = pgTable("game_store", {
+  id: text("id").primaryKey(),
+  gameId: text("game_id")
+    .notNull()
+    .references(() => game.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  url: text("url").notNull(),
+  price: numeric("price", { precision: 10, scale: 2 }).notNull(),
+  logo: text("logo").notNull(),
 });
 
 // Custom: Wishlist table for game wishlists
@@ -127,3 +156,5 @@ export type Cart = typeof cart.$inferSelect;
 export type Order = typeof orders.$inferSelect;
 export type OrderItem = typeof orderItems.$inferSelect;
 export type Review = typeof reviews.$inferSelect;
+export type Game = typeof game.$inferSelect;
+export type GameStore = typeof gameStore.$inferSelect;

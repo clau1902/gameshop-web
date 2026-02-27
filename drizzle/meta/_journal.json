@@ -15,6 +15,13 @@
       "when": 1764924981257,
       "tag": "0001_short_chat",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1772186688392,
+      "tag": "0002_sturdy_vindicator",
+      "breakpoints": true
     }
   ]
 }

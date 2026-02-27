@@ -491,7 +491,7 @@ export default function GameDetailPage({ params }: { params: Promise<{ id: strin
                                 Unavailable
                               </span>
                             ) : (
-                              <button
+                                <button
                                 onClick={() => handleAddToCart(store.name, store.price)}
                                 disabled={addingToCart === store.name}
                                 className="flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 disabled:opacity-50"

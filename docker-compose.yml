@@ -1,0 +1,31 @@
+services: 
+  db:
+    image: postgres:17
+    restart: always
+    environment:
+      POSTGRES_USER: biblion
+      POSTGRES_PASSWORD: biblion123
+      POSTGRES_DB: gamevault
+    ports:
+      - "5433:5432"
+    volumes:
+    - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U biblion -d gamevault"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      POSTGRES_URL: postgres://biblion:biblion123@db:5432/gamevault
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes: 
+  pgdata:
